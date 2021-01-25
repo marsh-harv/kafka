@@ -1,8 +1,4 @@
-from schema_registry.client import SchemaRegistryClient, schema
-
-client = SchemaRegistryClient(url="http://localhost:8081")
-
-deployment_schema = {
+{
     "type": "record",
     "namespace": "avro_schema_test",
     "name": "Test",
@@ -16,6 +12,6 @@ deployment_schema = {
 }
 
 
-avro_schema = schema.AvroSchema(deployment_schema)
 
-schema_id = client.register('Test', avro_schema)
+
+

@@ -1,32 +1,48 @@
-import os
-import json
-import time
-import pandas as pd 
-import pandavro as pdx
-from fastavro import reader
+import os, csv, json
 from kafka import KafkaProducer
 
+csvPath = '{}/oscar_age_male.csv'.format(os.path.dirname(__file__))
+jsonPath = '{}/test.json'.format(os.path.dirname(__file__))
 
+producer = KafkaProducer(bootstrap_servers = 'localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+topic = 'my-test-topic'
 
-topicName = 'test-topic-3'
-producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+# Function to first convert csv to JSON
+# Takes file paths as args
+def convert_to_json(csvPath, jsonPath):
 
+    data = {}
 
+    with open(csvPath, encoding="utf-8") as csv_dt:
+        csvReader = csv.DictReader(csv_dt)
 
-OUTPUT_PATH='{}/test.avro'.format(os.path.dirname(__file__))
-
-df = pd.read_csv('C:\kafka\kafka_producer\oscar_age_male.csv', delimiter=',', sep="\\")
-avro = pdx.to_avro(OUTPUT_PATH, df)
-with open(OUTPUT_PATH, 'rb') as data:
-    avro_reader = reader(data)
-    for record in avro_reader:
-        msg = producer.send(topicName, value=record)
-
-        metadata = msg.get()
-        print(metadata.topic)
-        print(metadata.partition)
-
+        for rows in csvReader:
+            key = rows['Index']
+            data[key] = rows
+    
+    with open(jsonPath, 'w', encoding='utf-8') as json_dt:
+        json_dt.write(json.dumps(data, indent=4))
         
+    
+    
+
+
+
+
+
+convert_to_json(csvPath, jsonPath)
+
+
+
+
+
+
+
+
+
+            
+
+
 
 
 
