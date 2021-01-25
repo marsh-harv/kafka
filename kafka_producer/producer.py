@@ -1,29 +1,33 @@
-import os, csv, avro.schema
-from avro.datafile import DataFileWriter
-from avro.io import DatumWriter
+import os, csv, avro.schema, fastavro
 from kafka import KafkaProducer
 
+schema = {
+    "type": "record",
+    "namespace": "avro_schema_test",
+    "name": "Test",
+    "fields": [
+        {"name": "Index", "type": "int"},
+        {"name": "Year", "type": "int"},
+        {"name": "Age", "type": "int"},
+        {"name": "Name", "type": "string"},
+        {"name": "Movie", "type": "string"}
+    ]
+}
+output_loc = '{}/avro.avro'.format(os.path.dirname(__file__))
 CSV = '{}/oscar_age_male.csv'.format(os.path.dirname(__file__))
 
-def read_csv(path):
-    with open(path, 'rU') as data:
-        reader = csv.DictReader(data)
-        for row in reader:
-            yield row
+with open(CSV) as data:
+    reader = csv.reader(data, delimiter=',')
+    
 
-def parse_schema(path='{}/schema.avsc'.format(os.path.dirname(__file__))):
-    with open(path, 'r') as data:
-        return avro.schema.parse(data.read())
+with open(output_loc, 'wb') as output:
+    fastavro.writer(output, schema, reader)
 
-def serialize_records(records, outpath='{}/test.avro'.format(os.path.dirname(__file__))):
-    schema = parse_schema()
-    with open(outpath, 'wb') as out:
-        writer = DataFileWriter(out, DatumWriter(), schema)
-        for record in records:
-            writer.append(record)
+with open(output_loc, 'rb') as av:
+    avro_reader = fastavro.reader(av)
+    for record in avro_reader:
+        print(record)
 
-if __name__ == "__main__":
-    serialize_records(read_csv(CSV))
 
 
 
