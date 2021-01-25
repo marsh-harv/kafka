@@ -1,36 +1,33 @@
-import os, csv, json
+import os, csv, avro.schema
+from avro.datafile import DataFileWriter
+from avro.io import DatumWriter
 from kafka import KafkaProducer
 
-csvPath = '{}/oscar_age_male.csv'.format(os.path.dirname(__file__))
-jsonPath = '{}/test.json'.format(os.path.dirname(__file__))
+CSV = '{}/oscar_age_male.csv'.format(os.path.dirname(__file__))
 
-producer = KafkaProducer(bootstrap_servers = 'localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-topic = 'my-test-topic'
+def read_csv(path):
+    with open(path, 'rU') as data:
+        reader = csv.DictReader(data)
+        for row in reader:
+            yield row
 
-# Function to first convert csv to JSON
-# Takes file paths as args
-def convert_to_json(csvPath, jsonPath):
+def parse_schema(path='{}/schema.avsc'.format(os.path.dirname(__file__))):
+    with open(path, 'r') as data:
+        return avro.schema.parse(data.read())
 
-    data = {}
+def serialize_records(records, outpath='{}/test.avro'.format(os.path.dirname(__file__))):
+    schema = parse_schema()
+    with open(outpath, 'wb') as out:
+        writer = DataFileWriter(out, DatumWriter(), schema)
+        for record in records:
+            writer.append(record)
 
-    with open(csvPath, encoding="utf-8") as csv_dt:
-        csvReader = csv.DictReader(csv_dt)
-
-        for rows in csvReader:
-            key = rows['Index']
-            data[key] = rows
-    
-    with open(jsonPath, 'w', encoding='utf-8') as json_dt:
-        json_dt.write(json.dumps(data, indent=4))
-        
-    
-    
+if __name__ == "__main__":
+    serialize_records(read_csv(CSV))
 
 
 
 
-
-convert_to_json(csvPath, jsonPath)
 
 
 
