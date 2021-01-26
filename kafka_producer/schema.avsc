@@ -1,0 +1,17 @@
+{
+    "type": "record",
+    "namespace": "avro_schema_test",
+    "name": "Test",
+    "fields": [
+        {"name": "Index", "type": "string"},
+        {"name": "Year", "type": "string"},
+        {"name": "Age", "type": "string"},
+        {"name": "Name", "type": "string"},
+        {"name": "Movie", "type": "string"}
+    ]
+}
+
+
+
+
+

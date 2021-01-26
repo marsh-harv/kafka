@@ -64,15 +64,6 @@ services:
     depends_on:
       - kafka
 
-  schema-registry-ui:
-      image: landoop/schema-registry-ui
-      hostname: kafka-schema-registry-ui
-      depends_on:
-        - schema-registry
-      ports:
-        - 8000:8000
-      environment:
-        SCHEMAREGISTRY_URL: "http://localhost:8081"
-        PROXY: "true"
+
       
 
